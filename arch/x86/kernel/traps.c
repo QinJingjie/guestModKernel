@@ -919,22 +919,72 @@ dotraplinkage void do_iret_error(struct pt_regs *regs, long error_code)
 }
 #endif
 
-dotraplinkage void do_virtualization_exception(struct pt_regs *regs, long error_code)
+dotraplinkage  void do_virtualization_exception(struct pt_regs *regs, long error_code)
 {
+	
+	int i=0;
 	//printk(KERN_ERR "kvm: #VE called!\n");
 	unsigned long address = read_cr2(); /* Get the faulting address */
-//	printk(KERN_ERR "The process is \"%s\"(pid is %i)\n",current->comm,current->pid);
-//	printk(KERN_ERR "kvm: #VE address: %16lx!\n", address);
+	
 	enum ctx_state prev_state;
-	prev_state = exception_enter();
-	//__do_page_fault(regs, error_code, address);
-	exception_exit(prev_state);
+//	printk(KERN_ERR "kvm: #VE address: %16lx!\n", address);
+	NEM_Monitor(regs);
+
+	
+	//sys call id	
+//	printk(KERN_ERR "11111 \n");
+
+//	printk(KERN_ERR "%d The process is \"%s\"(pid is %i)\n",  current->comm,current->pid);
+//	i++;
+
+
+
+//	prev_state = exception_enter();
+//	exception_exit(prev_state);
 //	do_trap(x86_TRAP_VE, SIGTRAP, "int20", regs, error_code, NULL);
 //	printk(KERN_ERR "kvm: finish #VE!\n");
 
 }
 NOKPROBE_SYMBOL(do_virtualization_exception);
 
+void static NEM_Monitor(struct pt_regs *regs)
+{
+	#define VMX_VMFUNC ".byte 0x0f,0x01,0xd4"
+
+	static int rax = 0, rcx = 0;
+
+	asm volatile("movq %%rax,%%rdx"			
+			:"=a"(rax)	
+			:
+			:"%rdx");
+	asm volatile("movq %%rcx,%%rdx"			
+			:"=c"(rcx)
+			:
+			:"%rdx");
+			
+	asm volatile(VMX_VMFUNC
+		:
+		: "a"(0),"c"(1)
+		: "cc");
+
+	
+
+//	printk(KERN_ERR "regs.rax:%ld, reag.rcx:%lx, regs.rdx:%lx\n", regs->ax, regs->cx, regs->dx);
+	printk(KERN_ERR  "The process is \"%s\"(pid is %i)\n",  current->comm,current->pid);
+
+	asm volatile(VMX_VMFUNC
+		:
+		: "a"(0),"c"(0)
+		: "cc");		
+	asm volatile("movq %%rax,%%rdx"			
+			:
+			:"a"(rax)
+			:"%rdx");
+	asm volatile("movq %%rcx,%%rdx" 		
+			:
+			:"c"(rcx)
+			:"%rdx");
+}
 /* Set of traps needed for early debugging. */
 void __init early_trap_init(void)
 {

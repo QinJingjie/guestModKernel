@@ -1069,8 +1069,12 @@ END(page_fault)
 
 ENTRY(virtualization_exception)
 	ASM_CLAC
-	pushl	$do_virtualization_exception
-	jmp common_exception
+	pushl	$0
+	SAVE_ALL
+	xorl	%edx, %edx			# zero error code
+	movl	%esp, %eax			# pt_regs pointer
+	call do_virtualization_exception	
+	jmp ret_from_exception
 END(virtualization_exception)
 
 common_exception:

@@ -857,7 +857,6 @@ idtentry spurious_interrupt_bug		do_spurious_interrupt_bug	has_error_code=0
 idtentry coprocessor_error		do_coprocessor_error		has_error_code=0
 idtentry alignment_check		do_alignment_check		has_error_code=1
 idtentry simd_coprocessor_error		do_simd_coprocessor_error	has_error_code=0
-idtentry virtualization_exception	do_virtualization_exception	has_error_code=0
 
 	/*
 	 * Reload gs selector with exception handling
@@ -1000,7 +999,7 @@ apicinterrupt3 HYPERVISOR_CALLBACK_VECTOR \
 idtentry debug			do_debug		has_error_code=0	paranoid=1 shift_ist=DEBUG_STACK
 idtentry int3			do_int3			has_error_code=0	paranoid=1 shift_ist=DEBUG_STACK
 idtentry stack_segment		do_stack_segment	has_error_code=1
-
+idtentry virtualization_exception	do_virtualization_exception	has_error_code=0 paranoid=1 shift_ist=DEBUG_STACK
 #ifdef CONFIG_XEN
 idtentry xen_debug		do_debug		has_error_code=0
 idtentry xen_int3		do_int3			has_error_code=0

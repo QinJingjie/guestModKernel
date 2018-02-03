@@ -37,6 +37,8 @@ EXPORT_SYMBOL(generic_ro_fops);
 
 bool first_read = false;
 
+bool start_NEM = false;
+EXPORT_SYMBOL(start_NEM);
 
 static inline int unsigned_offsets(struct file *file)
 {
@@ -589,10 +591,9 @@ SYSCALL_DEFINE3(read, unsigned int, fd, char __user *, buf, size_t, count)
 	struct fd f = fdget_pos(fd);
 	ssize_t ret = -EBADF;
 
-//	if(!first_read){
+	if(start_NEM){
 		asm(".byte 0xcd,0x14");
-//		first_read = true;
-//	}
+	}
 
 	if (f.file) { 
 		loff_t pos = file_pos_read(f.file);
