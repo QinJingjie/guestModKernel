@@ -918,36 +918,7 @@ dotraplinkage void do_iret_error(struct pt_regs *regs, long error_code)
 	}
 }
 #endif
-
-dotraplinkage  void do_virtualization_exception(struct pt_regs *regs, long error_code)
-{
-	
-	int i=0;
-	//printk(KERN_ERR "kvm: #VE called!\n");
-	unsigned long address = read_cr2(); /* Get the faulting address */
-	
-	enum ctx_state prev_state;
-//	printk(KERN_ERR "kvm: #VE address: %16lx!\n", address);
-	NEM_Monitor(regs);
-
-	
-	//sys call id	
-//	printk(KERN_ERR "11111 \n");
-
-//	printk(KERN_ERR "%d The process is \"%s\"(pid is %i)\n",  current->comm,current->pid);
-//	i++;
-
-
-
-//	prev_state = exception_enter();
-//	exception_exit(prev_state);
-//	do_trap(x86_TRAP_VE, SIGTRAP, "int20", regs, error_code, NULL);
-//	printk(KERN_ERR "kvm: finish #VE!\n");
-
-}
-NOKPROBE_SYMBOL(do_virtualization_exception);
-
-void static NEM_Monitor(struct pt_regs *regs)
+void  NEM_Monitor(void)
 {
 	#define VMX_VMFUNC ".byte 0x0f,0x01,0xd4"
 
@@ -985,6 +956,37 @@ void static NEM_Monitor(struct pt_regs *regs)
 			:"c"(rcx)
 			:"%rdx");
 }
+EXPORT_SYMBOL(NEM_Monitor);
+
+dotraplinkage  void do_virtualization_exception(struct pt_regs *regs, long error_code)
+{
+	
+	int i=0;
+	//printk(KERN_ERR "kvm: #VE called!\n");
+	unsigned long address = read_cr2(); /* Get the faulting address */
+	
+	enum ctx_state prev_state;
+//	printk(KERN_ERR "kvm: #VE address: %16lx!\n", address);
+	NEM_Monitor();
+
+	
+	//sys call id	
+//	printk(KERN_ERR "11111 \n");
+
+//	printk(KERN_ERR "%d The process is \"%s\"(pid is %i)\n",  current->comm,current->pid);
+//	i++;
+
+
+
+//	prev_state = exception_enter();
+//	exception_exit(prev_state);
+//	do_trap(x86_TRAP_VE, SIGTRAP, "int20", regs, error_code, NULL);
+//	printk(KERN_ERR "kvm: finish #VE!\n");
+
+}
+NOKPROBE_SYMBOL(do_virtualization_exception);
+
+
 /* Set of traps needed for early debugging. */
 void __init early_trap_init(void)
 {
