@@ -1,7 +1,7 @@
-#define LBR_ENTRIES 4
+#define LBR_ENTRIES 8
 #define IA32_DEBUGCTL_LBR			1UL << 0
 #define LBR_SKIP 3
-#define LBR_SELECT 0x1
+#define LBR_SELECT 0
 #define LBR_FROM(from) (uint64_t)((((int64_t)from) << LBR_SKIP) >> LBR_SKIP)
 
 struct lbr_t {

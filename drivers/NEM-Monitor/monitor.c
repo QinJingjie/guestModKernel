@@ -68,63 +68,72 @@ void dump_lbr(struct lbr_t *lbr) {
 }
 void thread_core_1(void)
 {
-	// long msr_from_counter1, msr_to_counter1, ax1f, dx1f, ax1t, dx1t;
-	// int i=0;
-	// asm volatile(
-	// 	"xor %%rdx, %%rdx;"
-	// 	"xor %%rax, %%rax;"
-	// 	"inc %%rax;"
-	// 	"movq $0x1d9, %%rcx;"
-	// 	"wrmsr;"
-	// 	:
-	// 	:
-	// 	);
-	// printk("set LBR\n");
-//	get_lbr(&lbr);
+	long msr_from_counter1 = 1664, msr_to_counter1 = 1728, ax1f, dx1f, ax1t, dx1t;
+	int i=0;
+	asm volatile(
+		"xor %%rdx, %%rdx;"
+		"xor %%rax, %%rax;"
+		"inc %%rax;"
+		"movq $0x1d9, %%rcx;"
+		"wrmsr;"
+		:
+		:
+		);
+	printk("set LBR\n");
+	asm volatile (
+		"xor %%rdx, %%rdx;"
+		"xor %%rax, %%rax;"
+		"inc %%rax;"
+		"mov $0x1c8, %%rcx;"
+		"wrmsr;"
+		:
+		:
+		:
+		);
 	// for(msr_from_counter1 = 1664, msr_to_counter1 = 1728; msr_from_counter1 < 1680 ; 
 	// 	msr_from_counter1++,msr_to_counter1++)
 	// {
-	// 	printk("ssssssss i:%d\n",i++);
-	// 	asm volatile(
-	// 		"mov %4, %%rcx;"
-	// 		"rdmsr;"
-	// 		"mov %%rax, %0;"
-	// 		"mov %%rdx, %1;"
-	// 		"mov %5, %%rcx;"
-	// 		"rdmsr;"
-	// 		"mov %%rax, %2;"
-	// 		"mov %%rdx, %3;"
-	// 		: "=g" (ax1f), "=g"(dx1f), "=g"(ax1t), "=g"(dx1t)
-	// 		: "g" (msr_from_counter1), "g"(msr_to_counter1)
-	// 		: "%rax", "%rcx", "rdx"
-	// 		);
-	// 	printk("On cpu %d, brand from: %8x (MSR: %X), to %8x (MSR： %X)\n", smp_processor_id(), ax1f, msr_from_counter1, ax1t, msr_to_counter1);
+		printk("ssssssss i:%d\n",i++);
+		asm volatile(
+			"mov %4, %%rcx;"
+			"rdmsr;"
+			"mov %%rax, %0;"
+			"mov %%rdx, %1;"
+			"mov %5, %%rcx;"
+			"rdmsr;"
+			"mov %%rax, %2;"
+			"mov %%rdx, %3;"
+			: "=g" (ax1f), "=g"(dx1f), "=g"(ax1t), "=g"(dx1t)
+			: "g" (msr_from_counter1), "g"(msr_to_counter1)
+			: "%rax", "%rcx", "rdx"
+			);
+		printk("On cpu %d, brand from: %8x (MSR: %X), to %8x (MSR： %X)\n", smp_processor_id(), ax1f, msr_from_counter1, ax1t, msr_to_counter1);
 	// }
 	if(kthread_should_stop())
 	{
 		printk("stop thread\n");
 		return 0;
 	}
-	do_exit(0);
+//	do_exit(0);
 }
 
 int init_module(void)
 {
-	get_cpu();
-    wrmsrl(MSR_LBR_SELECT, LBR_SELECT);	 
-	flush_lbr(true);
-	get_lbr(&lbr);
-	dump_lbr(&lbr);
-	put_cpu();
-	// ts = kthread_create(thread_core_1, NULL, "kTH");
-	// printk("create thread cpu: %d\n",smp_processor_id());
+	// get_cpu();
+ //    wrmsrl(MSR_LBR_SELECT, LBR_SELECT);	 
+	// flush_lbr(true);
+	// get_lbr(&lbr);
+	// dump_lbr(&lbr);
+	// put_cpu();
+	ts = kthread_create(thread_core_1, NULL, "kTH");
+	printk("create thread cpu: %d\n",smp_processor_id());
 
-	// kthread_bind(ts, 0);
-	// printk("bind success\n");
-	// if(!IS_ERR(ts))
-	// 	wake_up_process(ts);
-	// else
-	// 	printk("error to bind thread\n");
+	kthread_bind(ts, 0);
+	printk("bind success\n");
+	if(!IS_ERR(ts))
+		wake_up_process(ts);
+	else
+		printk("error to bind thread\n");
 //	get_lbr(&lbr);
 	return 0;
 }

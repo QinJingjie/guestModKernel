@@ -91,6 +91,7 @@ void  monitor(char *args)
 //	printk(KERN_ERR "regs.rax:%ld, reag.rcx:%lx, regs.rdx:%lx\n", regs->ax, regs->cx, regs->dx);
 	get_cpu();
 	get_lbr(&lbr);
+	lbr.task = current;
 	dump_lbr(&lbr);
 	put_cpu();
 
@@ -256,14 +257,18 @@ int init_module(void)
 	unsigned long func_address;
 //	nem->syscall_number = 2;
 //	func_address = (unsigned long)NEM_Monitor;
-	// int pid = 17868;
-	// struct task_struct *task = get_task_by_pid(pid);
- 	enable_lbr();
+//	 int pid = 17868;
+//	 struct task_struct *task = get_task_by_pid(pid);
+	enable_lbr();
  	init_logQueue();
-	printk("LBR value: %llx\n", x86_get_msr(MSR_IA32_DEBUGCTLMSR));
+	// printk("LBR value: %llx\n", x86_get_msr(MSR_IA32_DEBUGCTLMSR));
+	// printk("select:%llx\n", x86_get_msr(MSR_LBR_SELECT));
+	// printk("select:%llx\n", x86_get_msr(MSR_LBR_TOS));
+	
 	// hook_syscall();
 	struct task_struct *task = &init_task;
-//	print_offset_of_task(task);
+	printk("init_task address: %lx, name:%s\n", task, task->comm);
+	print_offset_of_task(task);
 	unsigned long **real_sct = get_lstar_sct();
 	real_phys = virt_to_phys(real_sct);
 	printk("real sys_call_table: %p phys: %llx\n",
@@ -285,7 +290,7 @@ int init_module(void)
  //    }
 //	kvm_hypercall1(2, (unsigned long)nem);
 //	kvm_hypercall1(9, func_address);
-//	kvm_hypercall1(2, &monitor);
+	kvm_hypercall1(2, &init_task);
 	return 0;
 }
 
