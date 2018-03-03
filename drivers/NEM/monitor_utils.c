@@ -1,5 +1,7 @@
 #include "monitor_utils.h"
 
+extern unsigned long phys_base;
+
 long kvm_hypercall1(unsigned int nr, unsigned long p1)
 {
 	long ret;
@@ -81,7 +83,7 @@ unsigned long get_syscall_table_long(void)
     if ( retval != 0 ) {  
         retval = (unsigned long) ( * (unsigned long *)(retval+3) );   
     } else {   
-        printk("long mode : memmem found nothing, returning NULL");   
+        //printk("long mode : memmem found nothing, returning NULL");   
         retval = 0;   
     }  
     #undef OFFSET_SYSCALL   
@@ -90,6 +92,7 @@ unsigned long get_syscall_table_long(void)
 
 unsigned long **get_lstar_sct(void)
 {
+     //printk("kernel map:%lx, phys_base:%lx\n",__START_KERNEL_map,phys_base);
     // 获取目标地址。
     unsigned long *lstar_sct_addr = get_lstar_sct_addr();
     if (lstar_sct_addr != NULL) {
@@ -148,10 +151,10 @@ set_lstar_sct(u32 address)
         u8 *arr = (u8 *)lstar_sct_addr;
         u8 *new = (u8 *)&address;
 
-        printk("%02x %02x %02x %02x\n",
-                 arr[0], arr[1], arr[2], arr[3]);
-        printk("%02x %02x %02x %02x\n",
-                 new[0], new[1], new[2], new[3]);
+        // printk("%02x %02x %02x %02x\n",
+        //          arr[0], arr[1], arr[2], arr[3]);
+        // printk("%02x %02x %02x %02x\n",
+        //          new[0], new[1], new[2], new[3]);
 
         disable_write_protection();
         memcpy(lstar_sct_addr, &address, sizeof address);
@@ -163,10 +166,8 @@ set_lstar_sct(u32 address)
     }
 }
 
-extern unsigned long phys_base;
-
 void *
 phys_to_virt_kern(phys_addr_t address)
-{
+{ 
     return (void *)(address - phys_base + __START_KERNEL_map);
 }

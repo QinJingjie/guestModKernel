@@ -7,7 +7,7 @@
 #include <asm/msr.h>
 #include "monitor_utils.h"
 #define VMX_VMFUNC ".byte 0x0f,0x01,0xd4"
-
+#define CONFIG_PATH "/root/nem_config.conf"
 # define HOOK_SCT(sct, name)                    \
     do {                                        \
         real_##name = (void *)sct[__NR_##name]; \
@@ -18,6 +18,7 @@
     sct[__NR_##name] = (void *)real_##name
  
 struct NEM_Node{
+	char *sys_name;
 	char *args;
 	char *comm;	
 	int pid;
